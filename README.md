@@ -1,19 +1,32 @@
-Spatio-Temporal Graph Data Generation for Network Intrusion DetectionThis repository contains robust, highly-optimized data generation scripts for transforming raw network traffic datasets (CSVs) into Spatio-Temporal Graph formats and flattened arrays.These scripts are specifically designed to evaluate Graph Neural Networks (GNNs) and Spatio-Temporal models for Network Intrusion Detection Systems (NIDS). They strictly adhere to chronological causality, explicitly preventing the severe "temporal data leakage" issues prevalent in existing NIDS literature.🚀 Key FeaturesStrict Chronological & Stratified Splitting: Avoids naive train_test_split on global data. Data is grouped by time windows (snapshots), and splits are performed chronologically or via snapshot-level stratified sampling to maintain causal realism.Authentic Topological Preservation: Unlike some baselines that randomize IPs to prevent overfitting, this codebase hashes real Source and Destination IPs to construct genuine, dynamic interaction graphs.Unified Output Formats: Simultaneously generates PyTorch Geometric (.pt) graph sequences for Spatial-Temporal GNNs, and flattened arrays (.npz) for traditional Machine Learning/Sequence models (e.g., Random Forest, GRU, MLP).Class Imbalance & Fallback Handling: Includes robust mechanisms to ensure validation sets contain sufficient anomaly/attack edges, automatically adjusting split points (e.g., in ISCX-IDS-2012) or performing adaptive block searching (e.g., in Darknet2020) if necessary.📂 Supported DatasetsThe repository provides tailored generation scripts for four major NIDS/Traffic Classification datasets:DatasetScriptOutput DirectoryCIC-IDS2017generate_ids2017_dataset.pyprocessed_data/cic_ids2017/CIC-Darknet2020generate_2020_dataset.pyprocessed_data/darknet2020_block/UNSW-NB15generate_nb15_dataset.pyprocessed_data/unsw_nb15/ISCX-IDS-2012generate_iscx2012_dataset.pyprocessed_data/iscx_ids2012/🛠️ Environment RequirementsEnsure you have the following packages installed:Bashpip install pandas numpy scikit-learn tqdm joblib
+# Spatio-Temporal Graph Data Generation for Network Intrusion Detection
+
+This repository contains robust, highly-optimized data generation scripts for transforming raw network traffic datasets (CSVs) into Spatio-Temporal Graph formats and flattened arrays. 
+
+These scripts are specifically designed to evaluate Graph Neural Networks (GNNs) and Spatio-Temporal models for Network Intrusion Detection Systems (NIDS). They strictly adhere to chronological causality, explicitly preventing the severe "temporal data leakage" issues prevalent in existing NIDS literature.
+
+## 🚀 Key Features
+
+* **Strict Chronological & Stratified Splitting**: Avoids naive `train_test_split` on global data. Data is grouped by time windows (snapshots), and splits are performed chronologically or via snapshot-level stratified sampling to maintain causal realism.
+* **Authentic Topological Preservation**: Unlike some baselines that randomize IPs to prevent overfitting, this codebase hashes real Source and Destination IPs to construct genuine, dynamic interaction graphs.
+* **Unified Output Formats**: Simultaneously generates PyTorch Geometric (`.pt`) graph sequences for Spatial-Temporal GNNs, and flattened arrays (`.npz`) for traditional Machine Learning/Sequence models (e.g., Random Forest, GRU, MLP).
+* **Class Imbalance & Fallback Handling**: Includes robust mechanisms to ensure validation sets contain sufficient anomaly/attack edges, automatically adjusting split points (e.g., in ISCX-IDS-2012) or performing adaptive block searching (e.g., in Darknet2020) if necessary.
+
+## 📂 Supported Datasets
+
+The repository provides tailored generation scripts for four major NIDS/Traffic Classification datasets:
+
+| Dataset | Script | Output Directory |
+| :--- | :--- | :--- |
+| **CIC-IDS2017** | `generate_ids2017_dataset.py` | `processed_data/cic_ids2017/` |
+| **CIC-Darknet2020** | `generate_2020_dataset.py` | `processed_data/darknet2020_block/` |
+| **UNSW-NB15** | `generate_nb15_dataset.py` | `processed_data/unsw_nb15/` |
+| **ISCX-IDS-2012** | `generate_iscx2012_dataset.py` | `processed_data/iscx_ids2012/` |
+
+## 🛠️ Environment Requirements
+
+Ensure you have the following packages installed:
+
+```bash
+pip install pandas numpy scikit-learn tqdm joblib
 pip install torch torchvision torchaudio
 pip install torch_geometric
-📁 Directory Structure & PreparationBefore running the scripts, please download the raw CSV files from their respective official websites and place them into a data/ directory at the root of this project:Plaintext.
-├── data/
-│   ├── 2017/TrafficLabelling_/      # CIC-IDS2017 raw CSVs
-│   ├── CIC-Darknet2020/             # CIC-Darknet2020 raw CSVs
-│   ├── CIC-NUSW-NB15/               # UNSW-NB15 raw CSVs
-│   └── ISCXIDS2012/                 # ISCX-IDS-2012 raw CSVs
-├── generate_ids2017_dataset.py
-├── generate_2020_dataset.py
-├── generate_nb15_dataset.py
-└── generate_iscx2012_dataset.py
-⚙️ UsageSimply run the corresponding python script for your target dataset. For example, to process the CIC-IDS2017 dataset:Bashpython generate_ids2017_dataset.py
-The script will automatically execute: Data Cleaning -> Label Encoding -> Timestamp Sorting -> Normalization -> Graph Construction -> Saving.📊 Output ArtifactsUpon successful execution, the script creates a folder under processed_data/ containing the following standardized files:Graph Sequences (For PyTorch Geometric):train_graphs.pt: List of torch_geometric.data.Data objects for training.val_graphs.pt: List of Data objects for validation (Early Stopping).test_graphs.pt: List of Data objects for final evaluation.Graph Structure: Nodes are unique IPs. Edges are flows. Node features include degrees, port privileges, and packet statistics. Edge features are flow-level statistical metrics.Flattened Arrays (For Baselines like GRU, SVM, Random Forest):flattened_data.npz: Contains X_train, y_train, X_val, y_val, X_test, y_test strictly synchronized with the graph splits.Encoders (For Inference):scaler.pkl: The fitted StandardScaler.label_encoder.pkl: The fitted LabelEncoder (Maps 0, 1, 2... back to real attack names).📝 Graph Statistics OutputDuring execution, the script will output detailed label distributions for edges across Train/Val/Test splits. This guarantees transparency and confirms that the dataset contains a viable distribution for anomaly detection tasks:Plaintext--- Graph Statistics ---
-[Train Graphs] Edge Label Counts -> BENIGN(0): 1399084, DoS Hulk(4): 231073...
-[Val Graphs] Edge Label Counts -> BENIGN(0): 187974, DDoS(2): 128027...
-[Test Graphs] Edge Label Counts -> BENIGN(0): 156121, Bot(1): 1964...
-------------------------
