@@ -131,7 +131,7 @@ def main():
     data["Timestamp"] = _parse_timestamp_series(data["Timestamp"])
     data.dropna(subset=["Timestamp", "Src IP", "Dst IP"], inplace=True)
     data = data.sort_values("Timestamp").reset_index(drop=True)
-    data["time_idx"] = data["Timestamp"].dt.floor("min")
+    data["time_idx"] = data["Timestamp"].dt.floor("20s")
 
     # =========================================================
     # === 关键修正：执行快照级的分层抽样切分 (Stratified Split) ===

@@ -122,7 +122,7 @@ def main():
     data['Timestamp'] = pd.to_datetime(data['Timestamp'], dayfirst=True, errors='coerce')
     data.dropna(subset=['Timestamp'], inplace=True)
     data = data.sort_values('Timestamp')
-    data['time_idx'] = data['Timestamp'].dt.floor('min')
+    data['time_idx'] = data['Timestamp'].dt.floor('20s')
 
     unique_times = data['time_idx'].drop_duplicates().values
     train_idx = int(len(unique_times) * 0.8)
